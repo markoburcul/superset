@@ -1,0 +1,39 @@
+name: Build and Push Superset Docker Image
+
+# This determines when the action runs. 
+# It will run on every push to your branch, and you can also trigger it manually.
+on:
+  push:
+    branches:
+      - '6.1.0rc1-hr' # It will trigger automatically when you push to this branch
+  workflow_dispatch: # This allows you to run it manually from the GitHub UI
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          # Superset has a specific Dockerfile, make sure this points to the right one
+          # Usually, for standard builds, it's just 'Dockerfile' in the root.
+          file: ./Dockerfile
+          push: true
+          # Replace 'mburcul' with your actual Docker Hub username below
+          tags: mburcul/superset:6.1.0rc1-hr, mburcul/superset:latest
+          cache-from: type=registry,ref=mburcul/superset:buildcache
+          cache-to: type=registry,ref=mburcul/superset:buildcache,mode=max
