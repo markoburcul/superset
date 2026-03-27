@@ -626,19 +626,39 @@ class AuditMixinNullable(AuditMixin):
         return self.changed_on.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%z")
 
     def _format_time_humanized(self, timestamp: datetime) -> str:
+        from flask_babel import gettext as _, ngettext
+        
         locale = str(get_locale())
         time_diff = datetime.now() - timestamp
-        # Skip activation for 'en' locale as it's humanize's default locale
+        seconds = int(time_diff.total_seconds())
+        
         if locale == "en":
             return humanize.naturaltime(time_diff)
+        
         try:
             humanize.i18n.activate(locale)
             result = humanize.naturaltime(time_diff)
             humanize.i18n.deactivate()
             return result
-        except Exception as e:
-            logger.warning("Locale '%s' is not supported in humanize: %s", locale, e)
-            return humanize.naturaltime(time_diff)
+        except Exception:
+            # Fall back to custom translations via Flask-Babel
+            pass
+        
+        # Custom translation logic for unsupported locales (like Croatian)
+        if seconds < 60:
+            return _("now")
+        elif seconds < 3600:
+            minutes = seconds // 60
+            return ngettext("%(num)d minute ago", "%(num)d minutes ago", minutes) % {"num": minutes}
+        elif seconds < 86400:
+            hours = seconds // 3600
+            return ngettext("%(num)d hour ago", "%(num)d hours ago", hours) % {"num": hours}
+        elif seconds < 604800:
+            days = seconds // 86400
+            return ngettext("%(num)d day ago", "%(num)d days ago", days) % {"num": days}
+        else:
+            weeks = seconds // 604800
+            return ngettext("%(num)d week ago", "%(num)d weeks ago", weeks) % {"num": weeks}
 
     @property
     def changed_on_humanized(self) -> str:

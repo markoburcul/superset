@@ -34,6 +34,7 @@ import 'dayjs/locale/ko';
 import 'dayjs/locale/sk';
 import 'dayjs/locale/sl';
 import 'dayjs/locale/nl';
+import 'dayjs/locale/hr';
 
 /* eslint-disable no-restricted-imports */
 import { Locale } from 'antd/es/locale';
@@ -53,6 +54,7 @@ export const LOCALE_MAPPING = {
   sk: () => import('antd/locale/sk_SK'),
   sl: () => import('antd/locale/sl_SI'),
   nl: () => import('antd/locale/nl_NL'),
+  hr: () => import('antd/locale/hr_HR'),
 };
 /* eslint-enable no-restricted-imports */
 

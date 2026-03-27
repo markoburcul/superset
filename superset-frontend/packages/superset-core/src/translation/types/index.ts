@@ -30,6 +30,7 @@ export type Locale =
   | 'es'
   | 'fr'
   | 'it'
+  | 'hr'
   | 'ja'
   | 'ko'
   | 'pt'
